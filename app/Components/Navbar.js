@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Menu, X, ArrowUpRight } from "lucide-react";
-import ClerkAuth from "../ClerkAuth/page";
+import { Menu, X, ArrowUpRight } from "lucide-react"; 
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -67,7 +66,7 @@ const Navbar = () => {
               className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
             />
           </Link>
-          <ClerkAuth />
+           
         </div>
 
         {/* Mobile toggle */}
@@ -110,10 +109,7 @@ const Navbar = () => {
               >
                 Try now <ArrowUpRight size={15} />
               </Link>
-            </li>
-            <li className="pt-2">
-              <ClerkAuth />
-            </li>
+            </li> 
           </ul>
         </div>
       )}
