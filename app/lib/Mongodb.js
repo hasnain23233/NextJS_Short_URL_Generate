@@ -3,26 +3,31 @@
 import { MongoClient } from "mongodb";
 
 const uri = process.env.MONGODB_URI;
-const options = {
-  useNewUrlParser: true,
-};
+const options = {};
 
 let client;
 let clientPromise;
 
-if (!process.env.MONGODB_URI) {
-  throw new Error("Add Mongo URI to .env.local");
-}
-
-if (process.env.NODE_ENV === "development") {
-  if (!global._mongoClientPromise) {
-    client = new MongoClient(uri, options);
-    global._mongoClientPromise = client.connect();
+function getClientPromise() {
+  if (!uri) {
+    throw new Error(
+      "Add MONGODB_URI to your environment variables (.env.local locally, or Vercel Project Settings → Environment Variables)."
+    );
   }
-  clientPromise = global._mongoClientPromise;
-} else {
-  client = new MongoClient(uri, options);
-  clientPromise = client.connect();
+
+  if (process.env.NODE_ENV === "development") {
+    if (!global._mongoClientPromise) {
+      client = new MongoClient(uri, options);
+      global._mongoClientPromise = client.connect();
+    }
+    return global._mongoClientPromise;
+  }
+
+  if (!clientPromise) {
+    client = new MongoClient(uri, options);
+    clientPromise = client.connect();
+  }
+  return clientPromise;
 }
 
-export default clientPromise;
+export default getClientPromise;

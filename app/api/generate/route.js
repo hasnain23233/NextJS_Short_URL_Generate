@@ -1,21 +1,42 @@
-import clientPromise from "@/app/lib/Mongodb";
+// app/api/generate/route.js
+
+import getClientPromise from "@/app/lib/Mongodb";
 
 export async function POST(request) {
-  const body = await request.json();
-  const client = await clientPromise;
-  const db = client.db("bitlinks");
-  const collection = db.collection("url");
+  try {
+    const body = await request.json();
+    const { url, shorturl } = body;
 
-  const doc = await collection.findOne({ shorturl: body.shorturl })
-  if (doc) {
-    
-  return Response.json({ success: false, error: true, message: "This url is already in used. Please gererate another URL" });
-    
+    if (!url || !shorturl) {
+      return Response.json(
+        { success: false, error: true, message: "Both url and shorturl are required." },
+        { status: 400 }
+      );
+    }
+
+    const client = await getClientPromise();
+    const db = client.db("bitlinks");
+    const collection = db.collection("url");
+
+    const existing = await collection.findOne({ shorturl });
+    if (existing) {
+      return Response.json(
+        { success: false, error: true, message: "This short URL is already in use. Please try another." },
+        { status: 409 }
+      );
+    }
+
+    await collection.insertOne({ url, shorturl });
+
+    return Response.json(
+      { success: true, error: false, message: "Your short URL was generated successfully." },
+      { status: 201 }
+    );
+  } catch (err) {
+    console.error("Error in /api/generate:", err);
+    return Response.json(
+      { success: false, error: true, message: "Something went wrong. Please try again." },
+      { status: 500 }
+    );
   }
-  const result = await collection.insertOne({
-    url: body.url,
-    shorturl: body.shorturl,
-  });
-
-  return Response.json({ success: true, error: false, message: "Your short-url generate successfully!!!!!!!" });
 }
